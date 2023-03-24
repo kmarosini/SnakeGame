@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.effect.Bloom?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.effect.InnerShadow?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
+
+<StackPane xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.snake.HelloController">
+   <children>
+      <GridPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="400.0" prefWidth="800.0" style="-fx-background-color: #4a0b69;">
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <Label prefHeight="58.0" prefWidth="321.0" text="SNAKE GAME" textFill="#50ff3c" GridPane.columnIndex="1" GridPane.halignment="CENTER">
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="43.0" />
+               </font>
+               <effect>
+                  <InnerShadow />
+               </effect>
+            </Label>
+            <Label fx:id="lblStart" onMouseClicked="#startGame" onMousePressed="#startGame" text="START" textFill="#fff600" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+               <font>
+                  <Font name="Arial Rounded MT Bold" size="29.0" />
+               </font>
+               <effect>
+                  <Bloom />
+               </effect>
+            </Label>
+            <Label fx:id="lblExit" onMouseClicked="#exitApplication" text="EXIT" textFill="#fff600" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="2">
+               <font>
+                  <Font name="System Bold" size="21.0" />
+               </font>
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
+         </children>
+      </GridPane>
+   </children>
+</StackPane>

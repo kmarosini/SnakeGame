@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
+
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="760.0" prefWidth="1020.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.snake.GameViewController">
+   <children>
+      <AnchorPane fx:id="apGameWindow" prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: purple;">
+         <children>
+            <Canvas fx:id="cnSnakeBoard" height="500.0" layoutX="197.0" layoutY="14.0" style="-fx-blend-mode: lighten;" width="500.0" />
+            <Label layoutX="51.0" layoutY="47.0" text="SCORE" textFill="#fff600">
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="30.0" />
+               </font>
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
+            <Label fx:id="lblPlayerScore" layoutX="86.0" layoutY="73.0" text="-" textFill="#fff600">
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="47.0" />
+               </font>
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
+            <Button fx:id="playButton" layoutX="784.0" layoutY="55.0" mnemonicParsing="false" onMouseClicked="#btnPlayButtonClick" prefHeight="26.0" prefWidth="112.0" style="-fx-background-radius: 6, 5; -fx-background-color: linear-gradient(#f0ff35, #a9ff00),        radial-gradient(center 50% -40%, radius 200%, #b8ee36 45%, #80c800 50%); -fx-background-insets: 0,1; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.4) , 5, 0.0 , 0 , 1 ); -fx-text-fill: #395306;" text="Start">
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="19.0" />
+               </font>
+            </Button>
+            <Label fx:id="lblGameOver" layoutX="332.0" layoutY="82.0" text="PRESS START" textFill="RED">
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="40.0" />
+               </font>
+            </Label>
+            <Label fx:id="lblDocumentation" layoutX="37.0" layoutY="151.0" onMouseClicked="#lblDocumentationClick" prefHeight="35.0" prefWidth="140.0" text="DOCUMENTATION" textFill="#fff600">
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="16.0" />
+               </font>
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
+            <Label fx:id="lblSave" layoutX="85.0" layoutY="186.0" onMouseClicked="#saveGame" prefHeight="35.0" prefWidth="42.0" text="SAVE" textFill="#fff600">
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="16.0" />
+               </font>
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
+            <Label fx:id="lblSave1" layoutX="80.0" layoutY="228.0" onMouseClicked="#loadGame" prefHeight="35.0" prefWidth="51.0" text="LOAD" textFill="#fff600">
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="16.0" />
+               </font>
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
+         </children>
+      </AnchorPane>
+   </children>
+</StackPane>
