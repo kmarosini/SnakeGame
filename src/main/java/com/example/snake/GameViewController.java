@@ -2,11 +2,9 @@ package com.example.snake;
 
 import com.example.snake.models.*;
 import com.example.snake.utils.ReflectionUtils;
-import com.example.snake.utils.SerializationUtils;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
@@ -105,19 +103,24 @@ public class GameViewController implements Initializable {
 
         if (snakePosition == null) {
             snake = new ArrayList<>();
+
+            startPosition.setX(5);
+            startPosition.setY(19);
+
+            size.setDirection(Direction.UP);
+            size.setSnakeSize(2);
         } else {
+             // TODO: Popraviti snakesize prilikom loadanja nazad, popraviti score counter prilikom loadanja nazad
+            //  ovdje je probem, snake size je 4 a trebao bi biti 2
             snake = snakePosition;
         }
+
+
 
         // crtanje po Canvas elementu
         GraphicsContext gc = cnSnakeBoard.getGraphicsContext2D();
 
 
-        startPosition.setX(5);
-        startPosition.setY(19);
-
-        size.setSnakeSize(2);
-        size.setDirection(Direction.UP);
 
         // Food
         createFood();
@@ -180,7 +183,6 @@ public class GameViewController implements Initializable {
 
         lblGameOver.setText("");
         lblPlayerScore.setText(String.valueOf(size.getSnakeSize() - 2));
-
 
         // Get size
         size.snakeLenght(snake);
@@ -265,12 +267,13 @@ public class GameViewController implements Initializable {
 
         if (gameOver == false) {
             for (int i = 0; i < size.getSnakeSize(); i++) {
-                data.add(new SerializableSnake(snake.get(i).getX(),snake.get(i).getY(),size.getSnakeSize()));
+                data.add(new SerializableSnake(snake.get(i).getX(),snake.get(i).getY(),size.getSnakeSize(), size.getDirection(), lblPlayerScore.getText()));
             }
 
             try(ObjectOutputStream serialize = new ObjectOutputStream(new FileOutputStream("saveGame.ser"))) {
                 serialize.writeObject(data);
             }
+
         } else {
             System.out.println("The game is over! You can't save.");
         }
@@ -280,20 +283,32 @@ public class GameViewController implements Initializable {
 
         List<Position> snakeList = new ArrayList<>();
 
-        for (int i = 0; i < size.getSnakeSize(); i++) {
-            snake.add(new Position(startPosition.getX(), startPosition.getY()));
-        }
-
-        try(ObjectInputStream deserialize = new ObjectInputStream(new FileInputStream("saveGame.ser"))) {
-            List<SerializableSnake> data = (List<SerializableSnake>) deserialize.readObject();
-
-            for (SerializableSnake snake: data) {
-                snakeList.add(new Position((int) snake.getPositionX(), (int) snake.getPositionY()));
+        if (gameOver) {
+            for (int i = 0; i < size.getSnakeSize(); i++) {
+                snake.add(new Position(startPosition.getX(), startPosition.getY()));
             }
 
-            lblGameOver.setText("");
-            gameOver = false;
-            startGame(snakeList);
+            try(ObjectInputStream deserialize = new ObjectInputStream(new FileInputStream("saveGame.ser"))) {
+                List<SerializableSnake> data = (List<SerializableSnake>) deserialize.readObject();
+
+                for (SerializableSnake snake: data) {
+                    snakeList.add(new Position((int) snake.getPositionX(), (int) snake.getPositionY()));
+                }
+
+                // zadrzavanje pozicije u trenutku klika na saveGame
+                data.forEach(s -> size.setDirection(s.getDirection()));
+
+                // spremanje trenutnog rezultata
+                data.forEach(s -> lblPlayerScore.setText(String.valueOf(s.getSnakeSize() - 2)));
+
+                size.snakeLenght(snakeList);
+                lblGameOver.setText("");
+                gameOver = false;
+                startGame(snakeList);
+            }
+        } else {
+            System.out.println("You can't load the game yet!");
         }
+
     }
 }
