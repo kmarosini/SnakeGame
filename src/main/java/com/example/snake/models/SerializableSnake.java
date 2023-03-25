@@ -3,6 +3,7 @@ package com.example.snake.models;
 import javafx.geometry.Pos;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class SerializableSnake implements Serializable {
     private double positionX;

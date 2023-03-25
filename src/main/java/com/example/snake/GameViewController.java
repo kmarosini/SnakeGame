@@ -6,6 +6,7 @@ import com.example.snake.utils.SerializationUtils;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
@@ -87,7 +88,7 @@ public class GameViewController implements Initializable {
         speed = 3;
         lastTick = 0;
         playButton.setText("Restart");
-        startGame();
+        startGame(null);
         playButton.setDisable(true);
     }
 
@@ -96,14 +97,17 @@ public class GameViewController implements Initializable {
         ReflectionUtils.generateDocumentation();
     }
 
-    private void startGame() {
+    private void startGame(List<Position> snakePosition) {
         speed = 3;
         width = 20;
         height = 20;
         cornerSize = 25;
 
-        //current position
-        snake = new ArrayList<>();
+        if (snakePosition == null) {
+            snake = new ArrayList<>();
+        } else {
+            snake = snakePosition;
+        }
 
         // crtanje po Canvas elementu
         GraphicsContext gc = cnSnakeBoard.getGraphicsContext2D();
@@ -257,27 +261,39 @@ public class GameViewController implements Initializable {
 
     public void saveGame() throws IOException {
 
-        SerializableSnake data = new SerializableSnake(snake.get(0).getX(),snake.get(0).getY(),size.getSnakeSize());
+        List<SerializableSnake> data = new ArrayList<>();
 
-        try(ObjectOutputStream serialize = new ObjectOutputStream(new FileOutputStream("saveGame.ser"))) {
-            serialize.writeObject(data);
+        if (gameOver == false) {
+            for (int i = 0; i < size.getSnakeSize(); i++) {
+                data.add(new SerializableSnake(snake.get(i).getX(),snake.get(i).getY(),size.getSnakeSize()));
+            }
+
+            try(ObjectOutputStream serialize = new ObjectOutputStream(new FileOutputStream("saveGame.ser"))) {
+                serialize.writeObject(data);
+            }
+        } else {
+            System.out.println("The game is over! You can't save.");
         }
     }
 
     public void loadGame() throws IOException, ClassNotFoundException {
 
-        try(ObjectInputStream deserialize = new ObjectInputStream(new FileInputStream("saveGame.ser"))) {
-            SerializableSnake data = (SerializableSnake) deserialize.readObject();
+        List<Position> snakeList = new ArrayList<>();
 
-            GraphicsContext gc = cnSnakeBoard.getGraphicsContext2D();
-
-            gc.setFill(Color.LIMEGREEN);
-            gc.fillRect(data.getPositionX() * cornerSize, data.getPositionY() * cornerSize, cornerSize - 1, cornerSize - 1);
-            gc.setFill(Color.RED);
-            gc.fillRect(data.getPositionX() * cornerSize, data.getPositionY() * cornerSize, cornerSize -2, cornerSize - 2);
-
-
+        for (int i = 0; i < size.getSnakeSize(); i++) {
+            snake.add(new Position(startPosition.getX(), startPosition.getY()));
         }
 
+        try(ObjectInputStream deserialize = new ObjectInputStream(new FileInputStream("saveGame.ser"))) {
+            List<SerializableSnake> data = (List<SerializableSnake>) deserialize.readObject();
+
+            for (SerializableSnake snake: data) {
+                snakeList.add(new Position((int) snake.getPositionX(), (int) snake.getPositionY()));
+            }
+
+            lblGameOver.setText("");
+            gameOver = false;
+            startGame(snakeList);
+        }
     }
 }
