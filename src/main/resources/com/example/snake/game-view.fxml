@@ -47,7 +47,7 @@
                   <DropShadow />
                </effect>
             </Label>
-            <Label fx:id="lblSave" layoutX="85.0" layoutY="186.0" onMouseClicked="#saveGame" prefHeight="35.0" prefWidth="42.0" text="SAVE" textFill="#fff600">
+            <Label fx:id="lblSave" layoutX="84.0" layoutY="186.0" onMouseClicked="#saveGame" prefHeight="35.0" prefWidth="42.0" text="SAVE" textFill="#fff600">
                <font>
                   <Font name="Berlin Sans FB Demi Bold" size="16.0" />
                </font>
@@ -58,6 +58,14 @@
             <Label fx:id="lblLoad" layoutX="80.0" layoutY="228.0" onMouseClicked="#loadGame" prefHeight="35.0" prefWidth="51.0" text="LOAD" textFill="#fff600">
                <font>
                   <Font name="Berlin Sans FB Demi Bold" size="16.0" />
+               </font>
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
+            <Label fx:id="lblDate" layoutX="15.0" layoutY="552.0" prefHeight="35.0" prefWidth="71.0" text="12/3/2022" textFill="#fff600">
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="13.0" />
                </font>
                <effect>
                   <DropShadow />

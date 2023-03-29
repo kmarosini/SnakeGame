@@ -21,6 +21,8 @@ import java.io.*;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class GameViewController implements Initializable {
@@ -63,6 +65,9 @@ public class GameViewController implements Initializable {
     private Label lblPlayerScore;
 
     @FXML
+    private Label lblDate;
+
+    @FXML
     private Button playButton;
 
     @FXML
@@ -79,6 +84,10 @@ public class GameViewController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+        Date date = new Date();
+        lblDate.setText(formatter.format(date));
 
     }
 
