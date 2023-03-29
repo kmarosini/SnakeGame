@@ -189,9 +189,12 @@ public class GameViewController implements Initializable {
                 size.setDirection(Direction.RIGHT);
             }
         });
+
         // Adding snake parts
-        for (int i = 0; i < size.getSnakeSize(); i++) {
-            snake.add(new Position(startPosition.getX(), startPosition.getY()));
+        if(snakePosition == null) {
+            for (int i = 0; i < size.getSnakeSize(); i++) {
+                snake.add(new Position(startPosition.getX(), startPosition.getY()));
+            }
         }
     }
 
@@ -317,9 +320,9 @@ public class GameViewController implements Initializable {
         List<Position> snakeList = new ArrayList<>();
 
         if (gameOver) {
-            for (int i = 0; i < size.getSnakeSize(); i++) {
+            /*for (int i = 0; i < size.getSnakeSize(); i++) {
                 snake.add(new Position(startPosition.getX(), startPosition.getY()));
-            }
+            }*/
 
             try(ObjectInputStream deserialize = new ObjectInputStream(new FileInputStream("saveGame.ser"))) {
                 List<SerializableSnake> data = (List<SerializableSnake>) deserialize.readObject();
