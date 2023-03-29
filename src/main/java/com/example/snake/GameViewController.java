@@ -3,6 +3,7 @@ package com.example.snake;
 import com.example.snake.models.*;
 import com.example.snake.utils.ReflectionUtils;
 import javafx.animation.AnimationTimer;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
@@ -11,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
@@ -36,7 +38,9 @@ public class GameViewController implements Initializable {
     private static int cornerSize;
 
     private static boolean gameOver = false;
-    private static boolean isReset = false;
+    private int snakeSizeCounter = 0;
+
+    private int snakeScore;
 
     long lastTick = 0;
 
@@ -48,6 +52,9 @@ public class GameViewController implements Initializable {
 
     @FXML
     private Canvas cnSnakeBoard;
+
+    @FXML
+    private Label lblLoad;
 
     @FXML
     private AnchorPane apGameWindow;
@@ -81,12 +88,13 @@ public class GameViewController implements Initializable {
     }
 
     private void restartGame() {
+
         lblGameOver.setText("");
         gameOver = false;
         speed = 3;
         lastTick = 0;
         playButton.setText("Restart");
-        startGame(null);
+        startGame(null, 0);
         playButton.setDisable(true);
     }
 
@@ -95,23 +103,27 @@ public class GameViewController implements Initializable {
         ReflectionUtils.generateDocumentation();
     }
 
-    private void startGame(List<Position> snakePosition) {
+    private void startGame(List<Position> snakePosition, int score) {
         speed = 3;
         width = 20;
         height = 20;
         cornerSize = 25;
 
-        if (snakePosition == null) {
+        if (snakePosition == null && score == 0) {
             snake = new ArrayList<>();
 
             startPosition.setX(5);
             startPosition.setY(19);
+
+            snakeScore = 0;
+            lblPlayerScore.setText("0");
 
             size.setDirection(Direction.UP);
             size.setSnakeSize(2);
         } else {
              // TODO: Popraviti snakesize prilikom loadanja nazad, popraviti score counter prilikom loadanja nazad
             //  ovdje je probem, snake size je 4 a trebao bi biti 2
+            snakeScore = Integer.parseInt(String.valueOf(score));
             snake = snakePosition;
         }
 
@@ -182,7 +194,12 @@ public class GameViewController implements Initializable {
         }
 
         lblGameOver.setText("");
-        lblPlayerScore.setText(String.valueOf(size.getSnakeSize() - 2));
+        if (snakeScore == 0) {
+            lblPlayerScore.setText(String.valueOf(size.getSnakeSize() - 2));
+        } else {
+            lblPlayerScore.setText(String.valueOf(Integer.parseInt(String.valueOf(snakeScore))));
+        }
+        //lblPlayerScore.setText(String.valueOf(size.getSnakeSize() - 2));
 
         // Get size
         size.snakeLenght(snake);
@@ -221,6 +238,11 @@ public class GameViewController implements Initializable {
         if (food.getfX() == snake.get(0).getX() && food.getfY() == snake.get(0).getY()) {
             snake.add(new Position(-1, -1));
             size.setSnakeSize(size.getSnakeSize() + 1);
+            snakeSizeCounter++;
+
+            if (snakeScore != 0) {
+                snakeScore++;
+            }
 
             createFood();
         }
@@ -265,7 +287,9 @@ public class GameViewController implements Initializable {
 
         List<SerializableSnake> data = new ArrayList<>();
 
-        if (gameOver == false) {
+        snakeScore = Integer.parseInt(lblPlayerScore.getText());
+
+        if (!gameOver) {
             for (int i = 0; i < size.getSnakeSize(); i++) {
                 data.add(new SerializableSnake(snake.get(i).getX(),snake.get(i).getY(),size.getSnakeSize(), size.getDirection(), lblPlayerScore.getText()));
             }
@@ -299,12 +323,15 @@ public class GameViewController implements Initializable {
                 data.forEach(s -> size.setDirection(s.getDirection()));
 
                 // spremanje trenutnog rezultata
-                data.forEach(s -> lblPlayerScore.setText(String.valueOf(s.getSnakeSize() - 2)));
+                //data.forEach(s -> lblPlayerScore.setText(String.valueOf(s.getSnakeSize() - 2)));
+                lblPlayerScore.setText(String.valueOf(data.get(0).getScore()));
+
+                snakeScore = Integer.parseInt(lblPlayerScore.getText());
 
                 size.snakeLenght(snakeList);
-                lblGameOver.setText("");
+                lblGameOver.setText(String.valueOf(snakeScore));
                 gameOver = false;
-                startGame(snakeList);
+                startGame(snakeList, snakeScore);
             }
         } else {
             System.out.println("You can't load the game yet!");
