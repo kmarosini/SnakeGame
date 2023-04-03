@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.effect.Bloom?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.effect.InnerShadow?>
@@ -32,7 +33,7 @@
                   <InnerShadow />
                </effect>
             </Label>
-            <Label fx:id="lblStart" onMouseClicked="#startGame" onMousePressed="#startGame" text="START" textFill="#fff600" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1">
+            <Label fx:id="lblStart" onMouseClicked="#startGame" onMousePressed="#startGame" text="START" textFill="#fff600" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2">
                <font>
                   <Font name="Arial Rounded MT Bold" size="29.0" />
                </font>
@@ -48,6 +49,7 @@
                   <DropShadow />
                </effect>
             </Label>
+            <TextField fx:id="tfPlayerName" prefHeight="26.0" prefWidth="175.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
          </children>
       </GridPane>
    </children>

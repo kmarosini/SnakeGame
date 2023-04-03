@@ -71,6 +71,14 @@
                   <DropShadow />
                </effect>
             </Label>
+            <Label fx:id="lblReplay" layoutX="56.0" layoutY="264.0" onMouseClicked="#lblReplayClick" prefHeight="35.0" prefWidth="98.0" text="Replay" textFill="#fff600">
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="16.0" />
+               </font>
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
          </children>
       </AnchorPane>
    </children>
