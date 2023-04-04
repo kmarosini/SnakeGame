@@ -54,6 +54,8 @@ public class GameViewController implements Initializable {
 
     long lastTick = 0;
     private static List<Position> snake = new ArrayList<>();
+    private static List<Replay> replayList = new ArrayList<>();
+
     private static Position startPosition = new Position();
     private static Random rand = new Random();
     private SnakeLenght size = new SnakeLenght();
@@ -137,6 +139,8 @@ public class GameViewController implements Initializable {
         width = 20;
         height = 20;
         cornerSize = 25;
+
+        System.out.println("LIST SIZE: " + replayList.size());
 
         if (snakePosition == null && score == 0) {
             snake = new ArrayList<>();
@@ -223,6 +227,11 @@ public class GameViewController implements Initializable {
             XML_Save();
             return;
         }
+
+        // kreiranje replay liste na svaki tick
+        replayList.add(new Replay(startPosition.getX(), startPosition.getY(), food.getfX(), food.getfY(), lblPlayerScore.getText(), size.getDirection()));
+
+
 
         lblGameOver.setText("");
         if (snakeScore == 0) {
@@ -374,33 +383,31 @@ public class GameViewController implements Initializable {
     private void XML_Load() {
         try {
             File snakeStream = new File("C:\\Users\\karlo\\OneDrive\\Radna površina\\Java2\\Snake\\Record.xml");
-            DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document xmlDocument = parser.parse(snakeStream);
-
-            String parentNodeName = xmlDocument.getDocumentElement().getNodeName();
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document xmlDocument = db.parse(snakeStream);
+            xmlDocument.getDocumentElement().normalize();
+            System.out.println("Root element: " + xmlDocument.getDocumentElement().getNodeName());
             NodeList nodeList = xmlDocument.getElementsByTagName("Snake");
 
-            List<SerializableSnake> snakeList = new ArrayList<>();
-
             for (int i = 0; i < nodeList.getLength(); i++) {
-                Node snakeNode = nodeList.item(i);
+                Node node = nodeList.item(i);
+                System.out.println("Node name: " + node.getNodeName());
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    Element eElement = (Element) node;
 
-                if (snakeNode.getNodeType() == Node.ELEMENT_NODE) {
-                    Element snakeElement = (Element)snakeNode;
-
-                    String snake_pos_x = snakeElement.getElementsByTagName("Position").item(0).getChildNodes().item(0).getTextContent();
-                    String snake_pos_y = snakeElement.getElementsByTagName("Position").item(0).getChildNodes().item(1).getTextContent();
-                    String snake_pos_fX = snakeElement.getElementsByTagName("Food").item(0).getChildNodes().item(0).getTextContent();
-                    String snake_pos_fY = snakeElement.getElementsByTagName("Food").item(0).getChildNodes().item(1).getTextContent();
-                    String snake_score = snakeElement.getElementsByTagName("Score").item(0).getChildNodes().item(0).getTextContent();
-                    String snake_direction = snakeElement.getElementsByTagName("Direction").item(0).getChildNodes().item(0).getTextContent();
-
-                    System.out.println("x: " + snake_pos_x + " , " + "y: " + snake_pos_y);
-                    System.out.println("fX: " + snake_pos_fX + " , " + "y: " + snake_pos_fY);
-                    System.out.println("Score: " + snake_score);
-                    System.out.println("Direction: " + snake_direction);
+                    for (int j = 0; j < replayList.size(); j++) {
+                        System.out.println("---------------------------------------------------------------------");
+                        System.out.println("Position X: " + eElement.getElementsByTagName("X").item(j).getTextContent());
+                        System.out.println("Position Y: " + eElement.getElementsByTagName("Y").item(j).getTextContent());
+                        System.out.println("Food position X: " + eElement.getElementsByTagName("fX").item(j).getTextContent());
+                        System.out.println("Food position Y: " + eElement.getElementsByTagName("fY").item(j).getTextContent());
+                        System.out.println("Score: " + eElement.getElementsByTagName("Score").item(j).getTextContent());
+                        System.out.println("Direction: " + eElement.getElementsByTagName("Direction").item(j).getTextContent());
+                    }
                 }
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -415,55 +422,61 @@ public class GameViewController implements Initializable {
             Element rootElement = xmlDocument.createElement("Snake");
             xmlDocument.appendChild(rootElement);
 
-            Element snake_element = xmlDocument.createElement("Position");
-            Element element_x = xmlDocument.createElement("X");
-            Node node_x = xmlDocument.createTextNode(String.valueOf(startPosition.getX()));
-            element_x.appendChild(node_x);
-            snake_element.appendChild(element_x);
-            rootElement.appendChild(snake_element);
-            //-------------------------------------------------
-
-            Element element_y = xmlDocument.createElement("Y");
-            Node node_y = xmlDocument.createTextNode(String.valueOf(startPosition.getY()));
-            element_y.appendChild(node_y);
-            snake_element.appendChild(element_y);
-            rootElement.appendChild(snake_element);
-            //-------------------------------------------------
-
-            Element food_element = xmlDocument.createElement("Food");
-            Element food_x = xmlDocument.createElement("fX");
-            Node node_food_x = xmlDocument.createTextNode(String.valueOf(food.getfX()));
-            food_x.appendChild(node_food_x);
-            food_element.appendChild(food_x);
-            rootElement.appendChild(food_element);
-            //---------------------------------------------------
-
-            Element food_y = xmlDocument.createElement("fY");
-            Node node_food_y = xmlDocument.createTextNode(String.valueOf(food.getfY()));
-            food_y.appendChild(node_food_y);
-            food_element.appendChild(food_y);
-            rootElement.appendChild(food_element);
-            //----------------------------------------------------
-
-            Element score_element = xmlDocument.createElement("Score");
-            Node node_score = xmlDocument.createTextNode(String.valueOf(size.getSnakeSize()-2));
-            score_element.appendChild(node_score);
-            rootElement.appendChild(score_element);
-            //----------------------------------------------------
-
-            Element direction_element = xmlDocument.createElement("Direction");
-            Node node_direction = xmlDocument.createTextNode(String.valueOf(size.getDirection()));
-            direction_element.appendChild(node_direction);
-            rootElement.appendChild(direction_element);
-            //----------------------------------------------------------
+            for (int i = 0; i < replayList.size(); i++) {
 
 
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                Element snake_element = xmlDocument.createElement("Position");
+                Element element_x = xmlDocument.createElement("X");
+                Node node_x = xmlDocument.createTextNode(String.valueOf(replayList.get(i).getPositionX()));
+                element_x.appendChild(node_x);
+                snake_element.appendChild(element_x);
+                rootElement.appendChild(snake_element);
+                //-------------------------------------------------
 
-            Source xmlSource = new DOMSource(xmlDocument);
-            Result xmlResult = new StreamResult(new File("Record.xml"));
+                Element element_y = xmlDocument.createElement("Y");
+                Node node_y = xmlDocument.createTextNode(String.valueOf(replayList.get(i).getPositionY()));
+                element_y.appendChild(node_y);
+                snake_element.appendChild(element_y);
+                rootElement.appendChild(snake_element);
+                //-------------------------------------------------
 
-            transformer.transform(xmlSource, xmlResult);
+                Element food_element = xmlDocument.createElement("Food");
+                Element food_x = xmlDocument.createElement("fX");
+                Node node_food_x = xmlDocument.createTextNode(String.valueOf(replayList.get(i).getFoodX()));
+                food_x.appendChild(node_food_x);
+                food_element.appendChild(food_x);
+                rootElement.appendChild(food_element);
+                //---------------------------------------------------
+
+                Element food_y = xmlDocument.createElement("fY");
+                Node node_food_y = xmlDocument.createTextNode(String.valueOf(replayList.get(i).getFoodY()));
+                food_y.appendChild(node_food_y);
+                food_element.appendChild(food_y);
+                rootElement.appendChild(food_element);
+                //----------------------------------------------------
+
+                Element score_element = xmlDocument.createElement("Score");
+                Node node_score = xmlDocument.createTextNode(String.valueOf(replayList.get(i).getScore()));
+                score_element.appendChild(node_score);
+                rootElement.appendChild(score_element);
+                //----------------------------------------------------
+
+                Element direction_element = xmlDocument.createElement("Direction");
+                Node node_direction = xmlDocument.createTextNode(String.valueOf(replayList.get(i).getDirection()));
+                direction_element.appendChild(node_direction);
+                rootElement.appendChild(direction_element);
+                //----------------------------------------------------------
+
+
+                Transformer transformer = TransformerFactory.newInstance().newTransformer();
+
+                Source xmlSource = new DOMSource(xmlDocument);
+                Result xmlResult = new StreamResult(new File("Record.xml"));
+
+                transformer.transform(xmlSource, xmlResult);
+
+            }
+
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Information!");
