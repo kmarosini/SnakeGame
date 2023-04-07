@@ -3,6 +3,7 @@ module com.example.snake {
     requires javafx.fxml;
     requires java.xml;
     requires java.rmi;
+    requires java.naming;
 
 
     opens com.example.snake to javafx.fxml;

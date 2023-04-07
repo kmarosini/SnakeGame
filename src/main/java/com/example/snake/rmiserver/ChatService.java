@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ChatService extends Remote {
 
-    String REMOTE_OBJECT_NAME = "com.example.snake.rmiserver";
+    //String REMOTE_OBJECT_NAME = "com.example.snake.rmiserver";
 
     void sendMessage(String message, String user) throws RemoteException;
     List<String> getChatHistory() throws RemoteException;

@@ -3,6 +3,7 @@ package com.example.snake;
 import com.example.snake.models.*;
 import com.example.snake.rmiserver.ChatService;
 import com.example.snake.rmiserver.ChatServiceImpl;
+import com.example.snake.utils.JNDIHelper;
 import com.example.snake.utils.ReflectionUtils;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
@@ -31,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import javax.naming.NamingException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.*;
@@ -118,12 +120,18 @@ public class GameViewController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
         try {
+            String rmiObjectName = JNDIHelper.getConfigurationParameter("remote_object_name");
+
             Registry registry = LocateRegistry.getRegistry("localhost", 1919);
-            stub = (ChatService) registry.lookup(ChatService.REMOTE_OBJECT_NAME);
+            stub = (ChatService) registry.lookup(rmiObjectName);
 
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         } catch (NotBoundException e) {
+            throw new RuntimeException(e);
+        } catch (NamingException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
