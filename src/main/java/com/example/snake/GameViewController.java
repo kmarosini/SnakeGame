@@ -1,15 +1,15 @@
 package com.example.snake;
 
 import com.example.snake.models.*;
+import com.example.snake.rmiserver.ChatService;
+import com.example.snake.rmiserver.ChatServiceImpl;
 import com.example.snake.utils.ReflectionUtils;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
@@ -22,12 +22,17 @@ import org.w3c.dom.NodeList;
 
 import java.io.*;
 import java.net.URL;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -60,8 +65,12 @@ public class GameViewController implements Initializable {
     private static Random rand = new Random();
     private SnakeLenght size = new SnakeLenght();
 
+
     @FXML
     private Canvas cnSnakeBoard;
+
+    @FXML
+    public TextField tfMessage;
 
     @FXML
     private Label lblLoad;
@@ -74,6 +83,13 @@ public class GameViewController implements Initializable {
 
     @FXML
     private Label lblDate;
+
+    @FXML Button btnSend;
+
+
+    @FXML
+    public TextArea taChat;
+
 
     @FXML
     private Button playButton;
@@ -93,19 +109,23 @@ public class GameViewController implements Initializable {
     @FXML
     private Label lblGameOver;
 
+    private HelloController helloController;
+
+    ChatService stub = null;
+    PlayerDetails playerDetails = null;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        Date date = new Date();
-        lblDate.setText(formatter.format(date));
+        try {
+            Registry registry = LocateRegistry.getRegistry("localhost", 1919);
+            stub = (ChatService) registry.lookup(ChatService.REMOTE_OBJECT_NAME);
 
-        System.out.println("Client thread is about to get started!");
-
-
-
-        System.out.println("Client thread started");
-
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        } catch (NotBoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @FXML
@@ -132,6 +152,18 @@ public class GameViewController implements Initializable {
     @FXML
     private void lblDocumentationClick() {
         ReflectionUtils.generateDocumentation();
+    }
+
+    @FXML
+    private void btnSendClick() {
+        try {
+            stub.sendMessage(tfMessage.getText(), HelloController.getPlayerDetails().getPlayerName());
+            StringBuilder sb = new StringBuilder();
+            stub.getChatHistory().forEach(a->sb.append(a + "\n"));
+            taChat.setText(sb.toString());
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void startGame(List<Position> snakePosition, int score) {

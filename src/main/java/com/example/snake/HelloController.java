@@ -21,11 +21,9 @@ import java.util.concurrent.Executors;
 public class HelloController {
 
     @FXML
-    private TextField tfPlayerName;
+    public TextField tfPlayerName;
 
     private static PlayerDetails playerDetails;
-
-    private static Map<Long, SnakeMetaData> snakeMetaData = new HashMap<>();
 
     public void startGame() throws IOException {
 
@@ -58,8 +56,6 @@ public class HelloController {
     public void exitApplication() throws IOException {
         HelloApplication.getMainStage().close();
     }
-
-    public static Map<Long, SnakeMetaData> getSnakeMetaData() {return snakeMetaData;}
 
     public static PlayerDetails getPlayerDetails() {
         return playerDetails;

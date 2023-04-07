@@ -3,6 +3,9 @@ package com.example.snake.models;
 public class PlayerDetails {
     private String playerName;
 
+    public PlayerDetails() {
+    }
+
     public PlayerDetails(String playerName) {
         this.playerName = playerName;
     }
