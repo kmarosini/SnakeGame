@@ -2,16 +2,16 @@ package com.example.snake.models;
 
 import java.util.List;
 
-public class SnakeLenght {
-    private int snakeSize;
+public class SnakeSize {
+    private int SnakeLength;
     private Direction direction;
 
-    public int getSnakeSize() {
-        return snakeSize;
+    public int getSnakeLength() {
+        return SnakeLength;
     }
 
-    public void setSnakeSize(int snakeSize) {
-        this.snakeSize = snakeSize;
+    public void setSnakeLength(int snakeLength) {
+        this.SnakeLength = snakeLength;
     }
 
     public void setDirection(Direction direction) {
@@ -22,12 +22,12 @@ public class SnakeLenght {
         return direction;
     }
 
-    public SnakeLenght() {
+    public SnakeSize() {
     }
 
     @Override
     public String toString() {
-        return snakeSize + "," + direction;
+        return SnakeLength + "," + direction;
     }
 
     public void snakeLenght(List<Position> snake) {

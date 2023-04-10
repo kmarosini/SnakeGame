@@ -2,7 +2,6 @@ package com.example.snake;
 
 import com.example.snake.models.*;
 import com.example.snake.rmiserver.ChatService;
-import com.example.snake.rmiserver.ChatServiceImpl;
 import com.example.snake.utils.JNDIHelper;
 import com.example.snake.utils.ReflectionUtils;
 import javafx.animation.AnimationTimer;
@@ -29,8 +28,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.naming.NamingException;
 import javax.xml.parsers.DocumentBuilder;
@@ -65,7 +62,7 @@ public class GameViewController implements Initializable {
 
     private static Position startPosition = new Position();
     private static Random rand = new Random();
-    private SnakeLenght size = new SnakeLenght();
+    private SnakeSize size = new SnakeSize();
 
 
     @FXML
@@ -82,9 +79,6 @@ public class GameViewController implements Initializable {
 
     @FXML
     private Label lblPlayerScore;
-
-    @FXML
-    private Label lblDate;
 
     @FXML Button btnSend;
 
@@ -111,8 +105,6 @@ public class GameViewController implements Initializable {
     @FXML
     private Label lblGameOver;
 
-    private HelloController helloController;
-
     ChatService stub = null;
     PlayerDetails playerDetails = null;
 
@@ -125,13 +117,7 @@ public class GameViewController implements Initializable {
             Registry registry = LocateRegistry.getRegistry("localhost", 1919);
             stub = (ChatService) registry.lookup(rmiObjectName);
 
-        } catch (RemoteException e) {
-            throw new RuntimeException(e);
-        } catch (NotBoundException e) {
-            throw new RuntimeException(e);
-        } catch (NamingException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
+        } catch (NotBoundException | NamingException | IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -192,7 +178,7 @@ public class GameViewController implements Initializable {
             lblPlayerScore.setText("0");
 
             size.setDirection(Direction.UP);
-            size.setSnakeSize(2);
+            size.setSnakeLength(2);
         } else {
             snakeScore = Integer.parseInt(String.valueOf(score));
             snake = snakePosition;
@@ -254,7 +240,7 @@ public class GameViewController implements Initializable {
 
         // Adding snake parts
         if(snakePosition == null) {
-            for (int i = 0; i < size.getSnakeSize(); i++) {
+            for (int i = 0; i < size.getSnakeLength(); i++) {
                 snake.add(new Position(startPosition.getX(), startPosition.getY()));
             }
         }
@@ -275,7 +261,7 @@ public class GameViewController implements Initializable {
 
         lblGameOver.setText("");
         if (snakeScore == 0) {
-            lblPlayerScore.setText(String.valueOf(size.getSnakeSize() - 2));
+            lblPlayerScore.setText(String.valueOf(size.getSnakeLength() - 2));
         } else {
             lblPlayerScore.setText(String.valueOf(Integer.parseInt(String.valueOf(snakeScore))));
         }
@@ -317,14 +303,14 @@ public class GameViewController implements Initializable {
         // Eating food
         if (food.getfX() == snake.get(0).getX() && food.getfY() == snake.get(0).getY()) {
             snake.add(new Position(-1, -1));
-            size.setSnakeSize(size.getSnakeSize() + 1);
+            size.setSnakeLength(size.getSnakeLength() + 1);
             snakeSizeCounter++;
 
             if (snakeScore != 0) {
                 snakeScore++;
             }
 
-            System.out.println("SIZE: " + size.getSnakeSize());
+            System.out.println("SIZE: " + size.getSnakeLength());
 
             createFood();
         }
@@ -348,8 +334,6 @@ public class GameViewController implements Initializable {
         // snake color
 
         for (Position p : snake) {
-            gc.setFill(Color.PINK);
-            gc.fillRect(p.getX() * cornerSize, p.getY() * cornerSize, cornerSize - 1, cornerSize - 1);
             gc.setFill(Color.BLUEVIOLET);
             gc.fillRect(p.getX() * cornerSize, p.getY() * cornerSize, cornerSize - 2, cornerSize - 2);
         }
@@ -372,8 +356,8 @@ public class GameViewController implements Initializable {
         snakeScore = Integer.parseInt(lblPlayerScore.getText());
 
         if (!gameOver) {
-            for (int i = 0; i < size.getSnakeSize(); i++) {
-                data.add(new SerializableSnake(snake.get(i).getX(),snake.get(i).getY(),size.getSnakeSize(), size.getDirection(), lblPlayerScore.getText()));
+            for (int i = 0; i < size.getSnakeLength(); i++) {
+                data.add(new SerializableSnake(snake.get(i).getX(),snake.get(i).getY(),size.getSnakeLength(), size.getDirection(), lblPlayerScore.getText()));
             }
 
             try(ObjectOutputStream serialize = new ObjectOutputStream(new FileOutputStream("saveGame.ser"))) {

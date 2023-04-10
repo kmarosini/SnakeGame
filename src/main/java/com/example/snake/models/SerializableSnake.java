@@ -28,6 +28,17 @@ public class SerializableSnake implements Serializable {
         this.score = score;
     }
 
+    @Override
+    public String toString() {
+        return "SerializableSnake{" +
+                "positionX=" + positionX +
+                ", positionY=" + positionY +
+                ", snakeSize=" + snakeSize +
+                ", direction=" + direction +
+                ", score='" + score + '\'' +
+                '}';
+    }
+
     public double getPositionX() {
         return positionX;
     }
