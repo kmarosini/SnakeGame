@@ -3,7 +3,7 @@ This is a Java project that implements a game engine using the MVC design patter
 
 INSTALLATION
 
-To use this project, you will need to have Java Development Kit (JDK) 11 or later installed on your system. Clone this repository to your local machine and open the project in your preferred Java Integrated Development Environment (IDE).
+To use this project, you will need to have Java Development Kit (JDK) 11 or later installed on your system. Clone this repository to your local machine and open the project in your preferred Java Integrated Development Environment (IDE). Project will not work without JNDI config file.
 
 FEATURES
 
