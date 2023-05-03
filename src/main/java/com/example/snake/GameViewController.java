@@ -40,11 +40,9 @@ import javax.xml.transform.stream.StreamResult;
 public class GameViewController implements Initializable {
 
     public static Food food = new Food();
-
     DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     Date date = new Date();
     Image image = new Image("simple-apple.png");
-
 
     private static int speed;
     private static int width;
@@ -53,17 +51,14 @@ public class GameViewController implements Initializable {
 
     private static boolean gameOver = false;
     private int snakeSizeCounter = 0;
-
     private int snakeScore;
 
     long lastTick = 0;
     private static List<Position> snake = new ArrayList<>();
     private static List<Replay> replayList = new ArrayList<>();
-
     private static Position startPosition = new Position();
     private static Random rand = new Random();
     private SnakeSize size = new SnakeSize();
-
 
     @FXML
     private Canvas cnSnakeBoard;
