@@ -2,6 +2,7 @@ package com.example.snake;
 
 import com.example.snake.models.*;
 import com.example.snake.rmiserver.ChatService;
+import com.example.snake.server.Server;
 import com.example.snake.utils.JNDIHelper;
 import com.example.snake.utils.ReflectionUtils;
 import javafx.animation.AnimationTimer;
@@ -21,6 +22,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.io.*;
+import java.net.Socket;
 import java.net.URL;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -76,6 +78,8 @@ public class GameViewController implements Initializable {
     private Label lblPlayerScore;
 
     @FXML Button btnSend;
+
+    @FXML Label lblServer;
 
 
     @FXML
@@ -141,6 +145,16 @@ public class GameViewController implements Initializable {
     @FXML
     private void lblDocumentationClick() {
         ReflectionUtils.generateDocumentation();
+    }
+
+    @FXML
+    private void lblServerClick() {
+
+        try(Socket clientSocket = new Socket(Server.HOST, Server.PORT)) {
+            process(clientSocket);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -253,6 +267,11 @@ public class GameViewController implements Initializable {
         replayList.add(new Replay(startPosition.getX(), startPosition.getY(), food.getfX(), food.getfY(), lblPlayerScore.getText(), size.getDirection()));
 
 
+        try(Socket clientSocket = new Socket(Server.HOST, Server.PORT)) {
+            process(clientSocket);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         lblGameOver.setText("");
         if (snakeScore == 0) {
@@ -304,9 +323,7 @@ public class GameViewController implements Initializable {
             if (snakeScore != 0) {
                 snakeScore++;
             }
-
             System.out.println("SIZE: " + size.getSnakeLength());
-
             createFood();
         }
 
@@ -316,7 +333,6 @@ public class GameViewController implements Initializable {
                 gameOver = true;
             }
         }
-
 
         gc.setFill(Color.WHITE);
         gc.fillRect(0,0,width * cornerSize, height * cornerSize);
@@ -443,7 +459,6 @@ public class GameViewController implements Initializable {
 
             for (int i = 0; i < replayList.size(); i++) {
 
-
                 Element snake_element = xmlDocument.createElement("Position");
                 Element element_x = xmlDocument.createElement("X");
                 Node node_x = xmlDocument.createTextNode(String.valueOf(replayList.get(i).getPositionX()));
@@ -505,6 +520,16 @@ public class GameViewController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    public void process(Socket clientSocket) throws IOException, ClassNotFoundException {
+        ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
+        ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
+
+        for (int i = 0; i < snake.size(); i++)
+        {
+            oos.writeObject(new SerializableSnake(snake.get(i).getX(),snake.get(i).getY(),size.getSnakeLength(), size.getDirection(), "2"));
+        }
+        System.out.println(ois.readObject());
     }
 }

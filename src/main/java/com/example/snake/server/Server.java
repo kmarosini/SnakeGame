@@ -11,7 +11,7 @@ import java.net.Socket;
 
 public class Server {
 
-    public static final int PORT = 1919;
+    public static final int PORT = 2020;
     public static final String HOST = "localhost";
 
     public static void main(String[] args) {
@@ -46,9 +46,5 @@ public class Server {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private static int Vowles(String message) {
-        return  message.toLowerCase().replaceAll("[^aeiou]", "").length();
     }
 }

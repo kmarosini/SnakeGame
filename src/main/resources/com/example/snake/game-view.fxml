@@ -73,7 +73,7 @@
                   <DropShadow />
                </effect>
             </Label>
-            <Label fx:id="lblReplay" layoutX="56.0" layoutY="264.0" onMouseClicked="#lblReplayClick" prefHeight="35.0" prefWidth="98.0" text="Replay" textFill="#fff600">
+            <Label fx:id="lblReplay" layoutX="77.0" layoutY="264.0" onMouseClicked="#lblReplayClick" prefHeight="35.0" prefWidth="51.0" text="Replay" textFill="#fff600">
                <font>
                   <Font name="Berlin Sans FB Demi Bold" size="16.0" />
                </font>
@@ -84,6 +84,14 @@
             <TextArea fx:id="taChat" layoutX="745.0" layoutY="119.0" prefHeight="203.0" prefWidth="158.0" />
             <Button fx:id="btnSend" layoutX="801.0" layoutY="380.0" mnemonicParsing="false" onMouseClicked="#btnSendClick" text="SEND" />
             <TextField fx:id="tfMessage" layoutX="750.0" layoutY="336.0" />
+            <Label fx:id="lblServer" layoutX="77.0" layoutY="304.0" onMouseClicked="#lblServerClick" prefHeight="35.0" prefWidth="51.0" text="Server" textFill="#fff600">
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="16.0" />
+               </font>
+               <effect>
+                  <DropShadow />
+               </effect>
+            </Label>
          </children>
       </AnchorPane>
    </children>
