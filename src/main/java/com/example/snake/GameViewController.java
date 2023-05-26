@@ -44,6 +44,7 @@ import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 
 public class GameViewController implements Initializable {
@@ -86,7 +87,7 @@ public class GameViewController implements Initializable {
     ChatService stub = null;
     PlayerDetails playerDetails = null;
     private boolean isHost = false;
-    private boolean opponentJoined = false;
+    public boolean opponentJoined = false;
     int port = 9999;
     int directionNum = -1;
 
@@ -126,6 +127,10 @@ public class GameViewController implements Initializable {
     @FXML
     private Button connectBtn;
 
+    ExecutorService executor = Executors.newFixedThreadPool(1);
+
+
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -136,7 +141,6 @@ public class GameViewController implements Initializable {
             String rmiObjectName = JNDIHelper.getConfigurationParameter("remote_object_name");
             Registry registry = LocateRegistry.getRegistry("localhost", 1919);
             stub = (ChatService) registry.lookup(rmiObjectName);
-            ExecutorService executor = Executors.newFixedThreadPool(1);
             executor.execute(new ChatThread(stub, taChat));
             taChat.setEditable(false);
 
@@ -540,14 +544,6 @@ public class GameViewController implements Initializable {
             }
         }
 
-        // gc.setFill(Color.WHITE);
-        // gc.fillRect(0,0,width * cornerSize, height * cornerSize);
-
-        // gc.setFill(new ImagePattern(image));
-        // System.out.println(opponentFood.getfX());
-        // System.out.println(opponentFood.getfY());
-        // gc.fillOval(opponentFood.getfX() * cornerSize, opponentFood.getfY() * cornerSize, cornerSize, cornerSize);
-
         // snake color
         for (Position p : opponentSnake) {
             gc.setFill(Color.LIMEGREEN);
@@ -886,6 +882,14 @@ public class GameViewController implements Initializable {
     public void exitApplication() throws IOException {
         System.out.println("Connected players " + connectedPlayers);
         HelloApplication.getMainStage().close();
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(800, TimeUnit.MILLISECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+        }
         stub.clearChatHistory();
         close();
     }
