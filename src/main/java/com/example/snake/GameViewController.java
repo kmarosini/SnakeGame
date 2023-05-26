@@ -38,32 +38,24 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
 public class GameViewController implements Initializable {
-
-    public static Food food = new Food();
-    DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    Date date = new Date();
+    // initial variables
     Image image = new Image("simple-apple.png");
-
-    private List<String> chatHistory = new ArrayList<>();
-
-
+    public static Food food = new Food();
     private static int speed;
     private static int width;
     private static int height;
     private static int cornerSize;
-
     private static boolean gameOver = false;
-    private int snakeSizeCounter = 0;
     private int snakeScore;
-
     long lastTick = 0;
     private static List<Position> snake = new ArrayList<>();
     private static List<Replay> replayList = new ArrayList<>();
@@ -71,19 +63,19 @@ public class GameViewController implements Initializable {
     private static Random rand = new Random();
     private SnakeSize size = new SnakeSize();
 
-
+    // Opponent snake
     List<Position> opponentSnake = new ArrayList<>();
     List<Replay> opponentReplayList = new ArrayList<>();
     Position opponentStartPosition = new Position();
     SnakeSize opponentSize = new SnakeSize();
     public static Food opponentFood = new Food();
     private static int opponentSpeed;
-
     private int opponentSnakeScore;
+
+
+
+    // network
     private int connectedPlayers = 0;
-
-
-
     ServerSocket serverSocket = null;
     Socket cliSocket = null;
     ObjectOutputStream outputStream = null;
@@ -91,66 +83,49 @@ public class GameViewController implements Initializable {
     Socket clientSocket = null;
     ObjectOutputStream objectOutputStream = null;
     ObjectInputStream objectInputStream = null;
+    ChatService stub = null;
+    PlayerDetails playerDetails = null;
+    private boolean isHost = false;
+    private boolean opponentJoined = false;
+    int port = 9999;
+    int directionNum = -1;
 
-    @FXML
-    private Canvas cnSnakeBoard;
-
-    @FXML
-    public TextField tfMessage;
-
+    // Labels
     @FXML
     private Label lblLoad;
-
-    @FXML
-    private AnchorPane apGameWindow;
-
     @FXML
     private Label lblPlayerScore;
-
     @FXML
     private Label lblPlayer2Score;
-
-
-    @FXML Button btnSend;
-
-    @FXML
-    public TextArea taChat;
-
-
-    @FXML
-    private Button playButton;
-
-    @FXML
-    private Button restartButton;
-
     @FXML
     private Label lblDocumentation;
-
     @FXML
     private Label lblSave;
-
     @FXML
     private Label lblReplay;
-
     @FXML
     private Label lblGameOver;
 
+    // Other
+    @FXML
+    public TextField tfMessage;
+    @FXML
+    public TextArea taChat;
+    @FXML
+    private Canvas cnSnakeBoard;
+    @FXML
+    private AnchorPane apGameWindow;
+
+    // Buttons
+    @FXML
+    Button btnSend;
+    @FXML
+    private Button playButton;
     @FXML
     private Button hostBtn;
-
     @FXML
     private Button connectBtn;
 
-    ChatService stub = null;
-    PlayerDetails playerDetails = null;
-
-    private boolean isHost = false;
-
-    private boolean opponentJoined = false;
-
-    int port = 9999;
-
-    int directionNum = -1;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -159,7 +134,6 @@ public class GameViewController implements Initializable {
 
         try {
             String rmiObjectName = JNDIHelper.getConfigurationParameter("remote_object_name");
-
             Registry registry = LocateRegistry.getRegistry("localhost", 1919);
             stub = (ChatService) registry.lookup(rmiObjectName);
             ExecutorService executor = Executors.newFixedThreadPool(1);
@@ -463,7 +437,6 @@ public class GameViewController implements Initializable {
             }
         }.start();
 
-
         // control
         apGameWindow.requestFocus();
 
@@ -665,7 +638,6 @@ public class GameViewController implements Initializable {
         if (food.getfX() == snake.get(0).getX() && food.getfY() == snake.get(0).getY()) {
             snake.add(new Position(-1, -1));
             size.setSnakeLength(size.getSnakeLength() + 1);
-            snakeSizeCounter++;
 
             if (snakeScore != 0) {
                 snakeScore++;
