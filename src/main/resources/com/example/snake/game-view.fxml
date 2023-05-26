@@ -15,7 +15,7 @@
       <AnchorPane fx:id="apGameWindow" prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: purple;">
          <children>
             <Canvas fx:id="cnSnakeBoard" height="500.0" layoutX="197.0" layoutY="14.0" style="-fx-blend-mode: lighten;" width="500.0" />
-            <Label layoutX="51.0" layoutY="47.0" text="SCORE" textFill="#fff600">
+            <Label layoutX="50.0" layoutY="28.0" text="SCORE" textFill="#fff600">
                <font>
                   <Font name="Berlin Sans FB Demi Bold" size="30.0" />
                </font>
@@ -23,7 +23,7 @@
                   <DropShadow />
                </effect>
             </Label>
-            <Label fx:id="lblPlayerScore" layoutX="86.0" layoutY="73.0" text="-" textFill="#fff600">
+            <Label fx:id="lblPlayerScore" layoutX="86.0" layoutY="48.0" prefHeight="35.0" prefWidth="19.0" text="-" textFill="#fff600">
                <font>
                   <Font name="Berlin Sans FB Demi Bold" size="47.0" />
                </font>
@@ -31,7 +31,7 @@
                   <DropShadow />
                </effect>
             </Label>
-            <Button fx:id="playButton" layoutX="784.0" layoutY="55.0" mnemonicParsing="false" onMouseClicked="#btnPlayButtonClick" prefHeight="26.0" prefWidth="112.0" style="-fx-background-radius: 6, 5; -fx-background-color: linear-gradient(#f0ff35, #a9ff00),        radial-gradient(center 50% -40%, radius 200%, #b8ee36 45%, #80c800 50%); -fx-background-insets: 0,1; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.4) , 5, 0.0 , 0 , 1 ); -fx-text-fill: #395306;" text="Start">
+            <Button fx:id="playButton" layoutX="775.0" layoutY="90.0" mnemonicParsing="false" onMouseClicked="#btnPlayButtonClick" prefHeight="26.0" prefWidth="112.0" style="-fx-background-radius: 6, 5; -fx-background-color: linear-gradient(#f0ff35, #a9ff00),        radial-gradient(center 50% -40%, radius 200%, #b8ee36 45%, #80c800 50%); -fx-background-insets: 0,1; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.4) , 5, 0.0 , 0 , 1 ); -fx-text-fill: #395306;" text="Start">
                <font>
                   <Font name="Berlin Sans FB Demi Bold" size="19.0" />
                </font>
@@ -73,7 +73,7 @@
                   <DropShadow />
                </effect>
             </Label>
-            <Label fx:id="lblReplay" layoutX="77.0" layoutY="264.0" onMouseClicked="#lblReplayClick" prefHeight="35.0" prefWidth="51.0" text="Replay" textFill="#fff600">
+            <Label fx:id="lblReplay" layoutX="56.0" layoutY="264.0" onMouseClicked="#lblReplayClick" prefHeight="35.0" prefWidth="98.0" text="Replay" textFill="#fff600">
                <font>
                   <Font name="Berlin Sans FB Demi Bold" size="16.0" />
                </font>
@@ -81,10 +81,44 @@
                   <DropShadow />
                </effect>
             </Label>
-            <TextArea fx:id="taChat" layoutX="745.0" layoutY="119.0" prefHeight="203.0" prefWidth="158.0" />
-            <Button fx:id="btnSend" layoutX="801.0" layoutY="380.0" mnemonicParsing="false" onMouseClicked="#btnSendClick" text="SEND" />
-            <TextField fx:id="tfMessage" layoutX="750.0" layoutY="336.0" />
-            <Label fx:id="lblServer" layoutX="77.0" layoutY="304.0" onMouseClicked="#lblServerClick" prefHeight="35.0" prefWidth="51.0" text="Server" textFill="#fff600">
+            <TextArea fx:id="taChat" layoutX="746.0" layoutY="213.0" prefHeight="203.0" prefWidth="158.0" />
+            <Button fx:id="btnSend" layoutX="801.0" layoutY="467.0" mnemonicParsing="false" onMouseClicked="#btnSendClick" text="SEND" />
+            <TextField fx:id="tfMessage" layoutX="750.0" layoutY="431.0" />
+            <Button fx:id="hostBtn" layoutX="713.0" layoutY="142.0" mnemonicParsing="false" onAction="#hostBtnClicked" prefHeight="26.0" prefWidth="112.0" style="-fx-background-radius: 6, 5; -fx-background-color: linear-gradient(#f0ff35, #a9ff00),        radial-gradient(center 50% -40%, radius 200%, #b8ee36 45%, #80c800 50%); -fx-background-insets: 0,1; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.4) , 5, 0.0 , 0 , 1 ); -fx-text-fill: #395306;" text="Host">
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="19.0" />
+               </font>
+            </Button>
+            <Button fx:id="connectBtn" layoutX="843.0" layoutY="142.0" mnemonicParsing="false" onAction="#connectBtnClicked" prefHeight="26.0" prefWidth="112.0" style="-fx-background-radius: 6, 5; -fx-background-color: linear-gradient(#f0ff35, #a9ff00),        radial-gradient(center 50% -40%, radius 200%, #b8ee36 45%, #80c800 50%); -fx-background-insets: 0,1; -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.4) , 5, 0.0 , 0 , 1 ); -fx-text-fill: #395306;" text="Connect">
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="19.0" />
+               </font>
+            </Button>
+            <Label layoutX="51.0" layoutY="65.0" prefHeight="35.0" prefWidth="26.0" text="P1:" textFill="#fff600">
+               <effect>
+                  <DropShadow />
+               </effect>
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="16.0" />
+               </font>
+            </Label>
+            <Label layoutX="51.0" layoutY="115.0" prefHeight="35.0" prefWidth="26.0" text="P2:" textFill="#fff600">
+               <effect>
+                  <DropShadow />
+               </effect>
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="16.0" />
+               </font>
+            </Label>
+            <Label fx:id="lblPlayer2Score" layoutX="86.0" layoutY="98.0" prefHeight="35.0" prefWidth="19.0" text="-" textFill="#fff600">
+               <effect>
+                  <DropShadow />
+               </effect>
+               <font>
+                  <Font name="Berlin Sans FB Demi Bold" size="47.0" />
+               </font>
+            </Label>
+            <Label fx:id="lblExit" layoutX="806.0" layoutY="545.0" onMouseClicked="#exitApplication" prefHeight="35.0" prefWidth="51.0" text="EXIT" textFill="#fff600">
                <font>
                   <Font name="Berlin Sans FB Demi Bold" size="16.0" />
                </font>

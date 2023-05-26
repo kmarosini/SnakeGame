@@ -1,8 +1,8 @@
 package com.example.snake;
 
+import com.example.snake.Threads.ChatThread;
 import com.example.snake.models.*;
 import com.example.snake.rmiserver.ChatService;
-import com.example.snake.server.Server;
 import com.example.snake.utils.JNDIHelper;
 import com.example.snake.utils.ReflectionUtils;
 import javafx.animation.AnimationTimer;
@@ -21,7 +21,17 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.naming.NamingException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
 import java.rmi.NotBoundException;
@@ -31,12 +41,8 @@ import java.rmi.registry.Registry;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import javax.naming.NamingException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class GameViewController implements Initializable {
@@ -45,6 +51,9 @@ public class GameViewController implements Initializable {
     DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     Date date = new Date();
     Image image = new Image("simple-apple.png");
+
+    private List<String> chatHistory = new ArrayList<>();
+
 
     private static int speed;
     private static int width;
@@ -62,6 +71,27 @@ public class GameViewController implements Initializable {
     private static Random rand = new Random();
     private SnakeSize size = new SnakeSize();
 
+
+    List<Position> opponentSnake = new ArrayList<>();
+    List<Replay> opponentReplayList = new ArrayList<>();
+    Position opponentStartPosition = new Position();
+    SnakeSize opponentSize = new SnakeSize();
+    public static Food opponentFood = new Food();
+    private static int opponentSpeed;
+
+    private int opponentSnakeScore;
+    private int connectedPlayers = 0;
+
+
+
+    ServerSocket serverSocket = null;
+    Socket cliSocket = null;
+    ObjectOutputStream outputStream = null;
+    ObjectInputStream inputStream = null;
+    Socket clientSocket = null;
+    ObjectOutputStream objectOutputStream = null;
+    ObjectInputStream objectInputStream = null;
+
     @FXML
     private Canvas cnSnakeBoard;
 
@@ -77,10 +107,11 @@ public class GameViewController implements Initializable {
     @FXML
     private Label lblPlayerScore;
 
+    @FXML
+    private Label lblPlayer2Score;
+
+
     @FXML Button btnSend;
-
-    @FXML Label lblServer;
-
 
     @FXML
     public TextArea taChat;
@@ -104,21 +135,200 @@ public class GameViewController implements Initializable {
     @FXML
     private Label lblGameOver;
 
+    @FXML
+    private Button hostBtn;
+
+    @FXML
+    private Button connectBtn;
+
     ChatService stub = null;
     PlayerDetails playerDetails = null;
 
+    private boolean isHost = false;
+
+    private boolean opponentJoined = false;
+
+    int port = 9999;
+
+    int directionNum = -1;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
+        playButton.setDisable(true);
 
         try {
             String rmiObjectName = JNDIHelper.getConfigurationParameter("remote_object_name");
 
             Registry registry = LocateRegistry.getRegistry("localhost", 1919);
             stub = (ChatService) registry.lookup(rmiObjectName);
+            ExecutorService executor = Executors.newFixedThreadPool(1);
+            executor.execute(new ChatThread(stub, taChat));
+            taChat.setEditable(false);
 
         } catch (NotBoundException | NamingException | IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @FXML
+    public void hostBtnClicked() {
+        isHost = true;
+        playButton.setDisable(false);
+        connectBtn.setDisable(true);
+        hostBtn.setDisable(true);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    serverSocket = new ServerSocket(port);
+                    System.out.println("Waiting for client connection...");
+                    clientSocket = serverSocket.accept();
+                    System.out.println("Client connected [" + clientSocket.getLocalAddress().getHostAddress() + ":" + clientSocket.getPort() + "]");
+
+                    objectOutputStream = new ObjectOutputStream(clientSocket.getOutputStream());
+                    objectInputStream = new ObjectInputStream(clientSocket.getInputStream());
+
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            while (!clientSocket.isClosed()) {
+                                try {
+
+                                    GameObject opponentGameObject = (GameObject) objectInputStream.readObject();
+
+                                    if (!opponentJoined) {
+                                        opponentJoined = true;
+                                        connectedPlayers++;
+                                    }
+
+                                    SnakeSize size = opponentGameObject.getSize();
+                                    opponentSize.setSnakeLength(size.getSnakeLength());
+
+                                    int direction = opponentGameObject.getDirectionNum();
+
+                                    if (direction == 1) {
+                                        opponentSize.setDirection(Direction.UP);
+                                    } else if (direction == 2) {
+                                        opponentSize.setDirection(Direction.DOWN);
+                                    } else if (direction == 3) {
+                                        opponentSize.setDirection(Direction.LEFT);
+                                    } else if (direction == 4) {
+                                        opponentSize.setDirection(Direction.RIGHT);
+                                    }
+
+                                    opponentSnakeScore = opponentGameObject.getScore();
+
+                                    // opponentFood = opponentGameObject.getFood();
+                                    opponentFood.setfX(opponentGameObject.getFood().getfX());
+                                    opponentFood.setfY(opponentGameObject.getFood().getfY());
+
+                                    opponentSnake = (ArrayList<Position>) opponentGameObject.getSnake();
+                                    opponentSpeed = opponentGameObject.getSpeed();
+
+                                    // opponentStartPosition = opponentGameObject.getStartPosition();
+                                    opponentStartPosition.setX(opponentGameObject.getStartPosition().getX());
+                                    opponentStartPosition.setY(opponentGameObject.getStartPosition().getY());
+                                    opponentReplayList = opponentGameObject.getReplayList();
+
+                                } catch (IOException e) {
+                                    close();
+                                    // Client disconnected
+                                    System.out.println("Client disconnected.");
+                                    connectedPlayers--;
+                                    throw new RuntimeException(e.getMessage());
+                                } catch (ClassNotFoundException e) {
+                                    close();
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        }
+                    }).start();
+
+                } catch (IOException e) {
+                    close();
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+    }
+
+    @FXML
+    public void connectBtnClicked() {
+        isHost = false;
+        playButton.setDisable(false);
+        connectBtn.setDisable(true);
+        hostBtn.setDisable(true);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    System.out.println("Connecting to Server...");
+                    cliSocket = new Socket("localhost", port);
+
+                    outputStream = new ObjectOutputStream(cliSocket.getOutputStream());
+                    inputStream = new ObjectInputStream(cliSocket.getInputStream());
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            while (!cliSocket.isClosed()) {
+                                try {
+                                    GameObject opponentGameObject = (GameObject) inputStream.readObject();
+
+                                    if (!opponentJoined) {
+                                        opponentJoined = true;
+                                        connectedPlayers++;
+                                    }
+                                    SnakeSize size = opponentGameObject.getSize();
+                                    opponentSize.setSnakeLength(size.getSnakeLength());
+
+                                    int direction = opponentGameObject.getDirectionNum();
+                                    if (direction == 1) {
+                                        opponentSize.setDirection(Direction.UP);
+                                    } else if (direction == 2) {
+                                        opponentSize.setDirection(Direction.DOWN);
+                                    } else if (direction == 3) {
+                                        opponentSize.setDirection(Direction.LEFT);
+                                    } else if (direction == 4) {
+                                        opponentSize.setDirection(Direction.RIGHT);
+                                    }
+
+                                    opponentSnakeScore = opponentGameObject.getScore();
+
+                                    //opponentFood = opponentGameObject.getFood();
+                                    opponentFood.setfX(opponentGameObject.getFood().getfX());
+                                    opponentFood.setfY(opponentGameObject.getFood().getfY());
+
+                                    opponentSnake = (ArrayList<Position>) opponentGameObject.getSnake();
+                                    opponentSpeed = opponentGameObject.getSpeed();
+
+                                    // opponentStartPosition = opponentGameObject.getStartPosition();
+                                    opponentStartPosition.setX(opponentGameObject.getStartPosition().getX());
+                                    opponentStartPosition.setY(opponentGameObject.getStartPosition().getY());
+
+                                    opponentReplayList = opponentGameObject.getReplayList();
+
+                                } catch (IOException e) {
+                                    close();
+                                    System.out.println(e.getMessage());
+                                } catch (ClassNotFoundException e) {
+                                    close();
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        }
+                    }).start();
+                } catch (IOException e) {
+                    close();
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
     }
 
     @FXML
@@ -132,13 +342,13 @@ public class GameViewController implements Initializable {
     }
 
     private void restartGame() {
-
         lblGameOver.setText("");
         gameOver = false;
         speed = 3;
         lastTick = 0;
         playButton.setText("Restart");
         startGame(null, 0);
+        opponentStartGame(null, 0);
         playButton.setDisable(true);
     }
 
@@ -148,28 +358,53 @@ public class GameViewController implements Initializable {
     }
 
     @FXML
-    private void lblServerClick() {
-
-        try(Socket clientSocket = new Socket(Server.HOST, Server.PORT)) {
-            process(clientSocket);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
     private void btnSendClick() {
         try {
             stub.sendMessage(tfMessage.getText(), HelloController.getPlayerDetails().getPlayerName());
             StringBuilder sb = new StringBuilder();
             stub.getChatHistory().forEach(a->sb.append(a + "\n"));
             taChat.setText(sb.toString());
+            tfMessage.clear();
+            tfMessage.requestFocus();
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void startGame(List<Position> snakePosition, int score) {
+    private void opponentStartGame(  List<Position> snakePosition, int score) {
+        opponentSpeed = 3;
+        width = 20;
+        height = 20;
+        cornerSize = 25;
+
+        if (snakePosition == null && score == 0) {
+            opponentSnake = new ArrayList<>();
+
+            opponentStartPosition.setX(5);
+            opponentStartPosition.setY(19);
+
+            opponentSnakeScore = 0;
+            lblPlayer2Score.setText("0");
+
+            opponentSize.setDirection(Direction.UP);
+            opponentSize.setSnakeLength(2);
+        } else {
+            opponentSnakeScore = Integer.parseInt(String.valueOf(score));
+            opponentSnake = snakePosition;
+        }
+
+        // Food
+        // createFood();
+
+        // Adding snake parts
+        if(snakePosition == null) {
+            for (int i = 0; i < opponentSize.getSnakeLength(); i++) {
+                opponentSnake.add(new Position(opponentStartPosition.getX(), opponentStartPosition.getY()));
+            }
+        }
+    }
+
+    private void startGame(  List<Position> snakePosition, int score) {
         speed = 3;
         width = 20;
         height = 20;
@@ -193,17 +428,13 @@ public class GameViewController implements Initializable {
             snake = snakePosition;
         }
 
-
-
         // crtanje po Canvas elementu
         GraphicsContext gc = cnSnakeBoard.getGraphicsContext2D();
-
-
 
         // Food
         createFood();
 
-         new AnimationTimer() {
+        new AnimationTimer() {
             @Override
             public void stop() {
                 if (gameOver) {
@@ -216,12 +447,18 @@ public class GameViewController implements Initializable {
                 if (lastTick == 0) {
                     lastTick = now;
                     tick(gc);
+                    if (opponentJoined) {
+                        opponentTick(gc);
+                    }
                     return;
                 }
 
                 if (now - lastTick > 1000000000 / speed) {
                     lastTick = now;
                     tick(gc);
+                    if (opponentJoined) {
+                        opponentTick(gc);
+                    }
                 }
             }
         }.start();
@@ -255,6 +492,119 @@ public class GameViewController implements Initializable {
         }
     }
 
+    private void opponentTick(GraphicsContext gc) {
+        if (gameOver) {
+            return;
+        }
+
+        // kreiranje replay liste na svaki tick
+        // replayList.add(new Replay(startPosition.getX(), startPosition.getY(), food.getfX(), food.getfY(), lblPlayerScore.getText(), size.getDirection()));
+
+        lblPlayer2Score.setText(String.valueOf(opponentSize.getSnakeLength() - 2));
+        /** if (opponentSnakeScore == 0) {
+         lblPlayer2Score.setText(String.valueOf(opponentSize.getSnakeLength() - 2));
+         } else {
+         lblPlayer2Score.setText(String.valueOf(Integer.parseInt(String.valueOf(opponentSnakeScore))));
+         } **/
+
+        // Get size
+        opponentSize.snakeLenght(opponentSnake);
+        opponentStartPosition.setX(opponentSnake.get(0).getX());
+        opponentStartPosition.setY(opponentSnake.get(0).getY());
+
+        switch (opponentSize.getDirection()) {
+            case UP -> {
+                opponentSnake.get(0).setY(opponentSnake.get(0).getY() - 1);
+                if (opponentSnake.get(0).getY() < 0) {
+                    gameOver = true;
+                }
+            }
+            case DOWN -> {
+                opponentSnake.get(0).setY(opponentSnake.get(0).getY() + 1);
+                //postavljanje granica za zid
+                if (opponentSnake.get(0).getY() >= height) {
+                    gameOver = true;
+                }
+            }
+            case LEFT -> {
+                opponentSnake.get(0).setX(opponentSnake.get(0).getX() - 1);
+                if (opponentSnake.get(0).getX() < 0) {
+                    gameOver = true;
+                }
+            }
+            case RIGHT -> {
+                opponentSnake.get(0).setX(opponentSnake.get(0).getX() + 1);
+                if (opponentSnake.get(0).getX() >= width) {
+                    gameOver = true;
+                }
+            }
+        }
+
+        // opponentSnake.add(new Position(-1, -1));
+        // opponentSize.setSnakeLength(opponentSize.getSnakeLength() + 1);
+
+        // Eating food
+        if (opponentFood.getfX() == opponentSnake.get(0).getX() && opponentFood.getfY() == opponentSnake.get(0).getY()) {
+            opponentSnake.add(new Position(-1, -1));
+            opponentSize.setSnakeLength(opponentSize.getSnakeLength() + 1);
+            // snakeSizeCounter++;
+
+            //if (snakeScore != 0) {
+            //    snakeScore++;
+            //}
+
+            System.out.println("SIZE: " + opponentSize.getSnakeLength());
+
+            // createFood();
+        }
+
+        System.out.println(opponentSnake.size());
+
+        // Self destroy
+        for (int i = 1; i < opponentSnake.size(); i++){
+            if (opponentSnake.get(0).getX() == opponentSnake.get(i).getX() && opponentSnake.get(0).getY() == opponentSnake.get(i).getY()) {
+                gameOver = true;
+            }
+        }
+
+        // gc.setFill(Color.WHITE);
+        // gc.fillRect(0,0,width * cornerSize, height * cornerSize);
+
+        // gc.setFill(new ImagePattern(image));
+        // System.out.println(opponentFood.getfX());
+        // System.out.println(opponentFood.getfY());
+        // gc.fillOval(opponentFood.getfX() * cornerSize, opponentFood.getfY() * cornerSize, cornerSize, cornerSize);
+
+        // snake color
+        for (Position p : opponentSnake) {
+            gc.setFill(Color.LIMEGREEN);
+            gc.fillRect(p.getX() * cornerSize, p.getY() * cornerSize, cornerSize - 2, cornerSize - 2);
+        }
+    }
+
+    public void close() {
+        try {
+            if (inputStream != null)
+                inputStream.close();
+            if (outputStream != null)
+                outputStream.close();
+            if (objectInputStream != null)
+                objectInputStream.close();
+            if (objectOutputStream != null)
+                objectOutputStream.close();
+            if (serverSocket != null)
+                serverSocket.close();
+            if (clientSocket != null)
+                clientSocket.close();
+            if (cliSocket != null)
+                cliSocket.close();
+            opponentJoined=false;
+            System.out.println("Connected players " + connectedPlayers);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void tick(GraphicsContext gc) {
         if (gameOver) {
             lblGameOver.setText("GAME OVER");
@@ -265,13 +615,6 @@ public class GameViewController implements Initializable {
 
         // kreiranje replay liste na svaki tick
         replayList.add(new Replay(startPosition.getX(), startPosition.getY(), food.getfX(), food.getfY(), lblPlayerScore.getText(), size.getDirection()));
-
-
-        try(Socket clientSocket = new Socket(Server.HOST, Server.PORT)) {
-            process(clientSocket);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         lblGameOver.setText("");
         if (snakeScore == 0) {
@@ -288,12 +631,14 @@ public class GameViewController implements Initializable {
 
         switch (size.getDirection()) {
             case UP -> {
+                directionNum = 1;
                 snake.get(0).setY(snake.get(0).getY() - 1);
                 if (snake.get(0).getY() < 0) {
                     gameOver = true;
                 }
             }
             case DOWN -> {
+                directionNum = 2;
                 snake.get(0).setY(snake.get(0).getY() + 1);
                 //postavljanje granica za zid
                 if (snake.get(0).getY() >= height) {
@@ -301,12 +646,14 @@ public class GameViewController implements Initializable {
                 }
             }
             case LEFT -> {
+                directionNum = 3;
                 snake.get(0).setX(snake.get(0).getX() - 1);
                 if (snake.get(0).getX() < 0) {
                     gameOver = true;
                 }
             }
             case RIGHT -> {
+                directionNum = 4;
                 snake.get(0).setX(snake.get(0).getX() + 1);
                 if (snake.get(0).getX() >= width) {
                     gameOver = true;
@@ -323,7 +670,9 @@ public class GameViewController implements Initializable {
             if (snakeScore != 0) {
                 snakeScore++;
             }
+
             System.out.println("SIZE: " + size.getSnakeLength());
+
             createFood();
         }
 
@@ -334,19 +683,57 @@ public class GameViewController implements Initializable {
             }
         }
 
+
         gc.setFill(Color.WHITE);
         gc.fillRect(0,0,width * cornerSize, height * cornerSize);
 
         gc.setFill(new ImagePattern(image));
-        System.out.println(food.getfX());
-        System.out.println(food.getfY());
+        // System.out.println(food.getfX());
+        // System.out.println(food.getfY());
         gc.fillOval(food.getfX() * cornerSize, food.getfY() * cornerSize, cornerSize, cornerSize);
 
         // snake color
-
         for (Position p : snake) {
             gc.setFill(Color.BLUEVIOLET);
             gc.fillRect(p.getX() * cornerSize, p.getY() * cornerSize, cornerSize - 2, cornerSize - 2);
+        }
+
+        // Send snake to the other player
+        GameObject gameObject = new GameObject();
+        gameObject.getSize().setSnakeLength(size.getSnakeLength());
+        gameObject.getSize().setDirection(size.getDirection());
+        gameObject.setDirectionNum(directionNum);
+        gameObject.setScore(snakeScore);
+
+        ArrayList<Position> list = new ArrayList<>();
+        list.addAll(snake);
+
+        gameObject.setSnake(snake);
+        gameObject.setSpeed(speed);
+        gameObject.setStartPosition(startPosition);
+        gameObject.setFood(food);
+        gameObject.setReplayList(opponentReplayList);
+
+        if (isHost) {
+            if (clientSocket != null && !clientSocket.isClosed()) {
+                try {
+                    objectOutputStream.writeObject(gameObject);
+                    objectOutputStream.flush();
+                } catch (IOException e) {
+                    close();
+                    throw new RuntimeException(e);
+                }
+            }
+        } else {
+            if (cliSocket != null && !cliSocket.isClosed()) {
+                try {
+                    outputStream.writeObject(gameObject);
+                    outputStream.flush();
+                } catch (IOException e) {
+                    close();
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 
@@ -431,7 +818,7 @@ public class GameViewController implements Initializable {
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element eElement = (Element) node;
 
-                    for (int j = 0; j < replayList.size(); j++) {
+                    for (int j = 1; j < replayList.size(); j++) {
                         System.out.println("---------------------------------------------------------------------");
                         System.out.println("Position X: " + eElement.getElementsByTagName("X").item(j).getTextContent());
                         System.out.println("Position Y: " + eElement.getElementsByTagName("Y").item(j).getTextContent());
@@ -458,6 +845,7 @@ public class GameViewController implements Initializable {
             xmlDocument.appendChild(rootElement);
 
             for (int i = 0; i < replayList.size(); i++) {
+
 
                 Element snake_element = xmlDocument.createElement("Position");
                 Element element_x = xmlDocument.createElement("X");
@@ -520,16 +908,14 @@ public class GameViewController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
-    public void process(Socket clientSocket) throws IOException, ClassNotFoundException {
-        ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
-        ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
-
-        for (int i = 0; i < snake.size(); i++)
-        {
-            oos.writeObject(new SerializableSnake(snake.get(i).getX(),snake.get(i).getY(),size.getSnakeLength(), size.getDirection(), "2"));
-        }
-        System.out.println(ois.readObject());
+    public void exitApplication() throws IOException {
+        System.out.println("Connected players " + connectedPlayers);
+        HelloApplication.getMainStage().close();
+        stub.clearChatHistory();
+        close();
     }
 }
+

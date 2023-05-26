@@ -1,5 +1,6 @@
 package com.example.snake.rmiserver;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,10 @@ public class ChatServiceImpl implements ChatService{
         chatHistory.add(user + ": " + message);
     }
 
+    @Override
+    public void clearChatHistory() throws RemoteException {
+        chatHistory.clear();
+    }
     @Override
     public List<String> getChatHistory() {
         return chatHistory;

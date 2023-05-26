@@ -1,8 +1,8 @@
 package com.example.snake.models;
 
-import javafx.scene.image.Image;
+import java.io.Serializable;
 
-public class Food {
+public class Food implements Serializable {
     private int fX;
     private int fY;
     private int fColor;

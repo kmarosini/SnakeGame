@@ -20,8 +20,6 @@ public class RmiServer {
             String rmiObjectName = JNDIHelper.getConfigurationParameter("remote_object_name");
             String random_port_hint = JNDIHelper.getConfigurationParameter("random_port_hint");
 
-
-
             Registry registry = LocateRegistry.createRegistry(Integer.parseInt(rmiPortString));
             ChatService chatService = new ChatServiceImpl();
             ChatService skeleton = (ChatService) UnicastRemoteObject.exportObject(chatService, Integer.parseInt(random_port_hint));

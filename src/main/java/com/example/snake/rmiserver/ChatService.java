@@ -9,6 +9,7 @@ public interface ChatService extends Remote {
     //String REMOTE_OBJECT_NAME = "com.example.snake.rmiserver";
 
     void sendMessage(String message, String user) throws RemoteException;
+    void clearChatHistory() throws RemoteException;
     List<String> getChatHistory() throws RemoteException;
 
 }

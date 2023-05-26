@@ -1,10 +1,12 @@
 package com.example.snake.models;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class SnakeSize {
+public class SnakeSize implements Serializable {
     private int SnakeLength;
     private Direction direction;
+
 
     public int getSnakeLength() {
         return SnakeLength;

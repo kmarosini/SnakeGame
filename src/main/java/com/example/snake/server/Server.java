@@ -2,8 +2,6 @@ package com.example.snake.server;
 
 import com.example.snake.models.SerializableSnake;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
@@ -11,7 +9,7 @@ import java.net.Socket;
 
 public class Server {
 
-    public static final int PORT = 2020;
+    public static final int PORT = 1919;
     public static final String HOST = "localhost";
 
     public static void main(String[] args) {
@@ -38,7 +36,7 @@ public class Server {
 
             SerializableSnake snake = (SerializableSnake) ois.readObject();
 
-            System.out.println(snake);
+            System.out.println("In Server: " + snake);
 
 
             oos.writeObject(snake);
@@ -46,5 +44,9 @@ public class Server {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static int Vowles(String message) {
+        return  message.toLowerCase().replaceAll("[^aeiou]", "").length();
     }
 }

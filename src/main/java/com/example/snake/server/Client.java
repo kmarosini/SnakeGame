@@ -3,9 +3,10 @@ package com.example.snake.server;
 import com.example.snake.models.Direction;
 import com.example.snake.models.SerializableSnake;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class Client {
     public static void main(String[] args) {
@@ -26,6 +27,6 @@ public class Client {
 
         oos.writeObject(new SerializableSnake(5.0,6.0,5, Direction.UP, "2"));
 
-        System.out.println(ois.readObject());
+        System.out.println("In client: " + ois.readObject());
     }
 }

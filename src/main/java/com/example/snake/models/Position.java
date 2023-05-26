@@ -1,6 +1,8 @@
 package com.example.snake.models;
 
-public class Position {
+import java.io.Serializable;
+
+public class Position implements Serializable {
     private int x;
     private int y;
 

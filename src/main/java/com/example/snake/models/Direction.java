@@ -1,6 +1,8 @@
 package com.example.snake.models;
 
-public enum Direction {
+import java.io.Serializable;
+
+public enum Direction implements Serializable {
     LEFT,
     RIGHT,
     UP,

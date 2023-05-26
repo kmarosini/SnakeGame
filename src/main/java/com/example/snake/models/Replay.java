@@ -1,6 +1,8 @@
 package com.example.snake.models;
 
-public class Replay {
+import java.io.Serializable;
+
+public class Replay implements Serializable {
     private double positionX;
     private double positionY;
     private double foodX;
