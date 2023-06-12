@@ -63,6 +63,7 @@ public class GameViewController implements Initializable {
     private static Position startPosition = new Position();
     private static Random rand = new Random();
     private SnakeSize size = new SnakeSize();
+    private final String path = "C:\\Users\\karlo\\OneDrive\\Radna površina\\Java2\\Snake\\Record.xml";
 
     // Opponent snake
     List<Position> opponentSnake = new ArrayList<>();
@@ -388,7 +389,6 @@ public class GameViewController implements Initializable {
         height = 20;
         cornerSize = 25;
 
-        System.out.println("LIST SIZE: " + replayList.size());
 
         if (snakePosition == null && score == 0) {
             snake = new ArrayList<>();
@@ -445,9 +445,7 @@ public class GameViewController implements Initializable {
         apGameWindow.requestFocus();
 
         apGameWindow.setOnKeyPressed(event -> {
-            System.out.println("USO");
             if (event.getCode() == KeyCode.W){
-                System.out.println("STISO SI GORE");
                 size.setDirection(Direction.UP);
             }
             if (event.getCode() == KeyCode.A){
@@ -478,11 +476,6 @@ public class GameViewController implements Initializable {
         // replayList.add(new Replay(startPosition.getX(), startPosition.getY(), food.getfX(), food.getfY(), lblPlayerScore.getText(), size.getDirection()));
 
         lblPlayer2Score.setText(String.valueOf(opponentSize.getSnakeLength() - 2));
-        /** if (opponentSnakeScore == 0) {
-         lblPlayer2Score.setText(String.valueOf(opponentSize.getSnakeLength() - 2));
-         } else {
-         lblPlayer2Score.setText(String.valueOf(Integer.parseInt(String.valueOf(opponentSnakeScore))));
-         } **/
 
         // Get size
         opponentSize.snakeLenght(opponentSnake);
@@ -517,22 +510,13 @@ public class GameViewController implements Initializable {
             }
         }
 
-        // opponentSnake.add(new Position(-1, -1));
-        // opponentSize.setSnakeLength(opponentSize.getSnakeLength() + 1);
-
         // Eating food
         if (opponentFood.getfX() == opponentSnake.get(0).getX() && opponentFood.getfY() == opponentSnake.get(0).getY()) {
             opponentSnake.add(new Position(-1, -1));
             opponentSize.setSnakeLength(opponentSize.getSnakeLength() + 1);
-            // snakeSizeCounter++;
-
-            //if (snakeScore != 0) {
-            //    snakeScore++;
-            //}
 
             System.out.println("SIZE: " + opponentSize.getSnakeLength());
 
-            // createFood();
         }
 
         System.out.println(opponentSnake.size());
@@ -725,11 +709,9 @@ public class GameViewController implements Initializable {
             for (int i = 0; i < size.getSnakeLength(); i++) {
                 data.add(new SerializableSnake(snake.get(i).getX(),snake.get(i).getY(),size.getSnakeLength(), size.getDirection(), lblPlayerScore.getText()));
             }
-
             try(ObjectOutputStream serialize = new ObjectOutputStream(new FileOutputStream("saveGame.ser"))) {
                 serialize.writeObject(data);
             }
-
         } else {
             System.out.println("The game is over! You can't save.");
         }
@@ -770,9 +752,12 @@ public class GameViewController implements Initializable {
         }
     }
 
-    private void XML_Load() {
+    private volatile File snakeStream;
+    private synchronized void XML_Load() {
+        // file je na razini klase
+        // ako ga zelim vise puta saveat onda mogu pristupiti više puta tom objektu iz drugih threadova
         try {
-            File snakeStream = new File("C:\\Users\\karlo\\OneDrive\\Radna površina\\Java2\\Snake\\Record.xml");
+            snakeStream = new File(path);
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document xmlDocument = db.parse(snakeStream);
@@ -813,7 +798,6 @@ public class GameViewController implements Initializable {
             xmlDocument.appendChild(rootElement);
 
             for (int i = 0; i < replayList.size(); i++) {
-
 
                 Element snake_element = xmlDocument.createElement("Position");
                 Element element_x = xmlDocument.createElement("X");

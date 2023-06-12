@@ -27,9 +27,7 @@ public class HelloController {
 
     public void startGame() throws IOException {
 
-
         String playerName = tfPlayerName.getText();
-
 
         if (playerName == "") {
             Alert alert = new Alert(Alert.AlertType.WARNING);
