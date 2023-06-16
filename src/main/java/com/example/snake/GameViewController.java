@@ -511,6 +511,7 @@ public class GameViewController implements Initializable {
         }
 
         // Eating food
+
         if (opponentFood.getfX() == opponentSnake.get(0).getX() && opponentFood.getfY() == opponentSnake.get(0).getY()) {
             opponentSnake.add(new Position(-1, -1));
             opponentSize.setSnakeLength(opponentSize.getSnakeLength() + 1);
@@ -519,7 +520,7 @@ public class GameViewController implements Initializable {
 
         }
 
-        System.out.println(opponentSnake.size());
+        //System.out.println(opponentSnake.size());
 
         // Self destroy
         for (int i = 1; i < opponentSnake.size(); i++){
@@ -751,7 +752,6 @@ public class GameViewController implements Initializable {
             System.out.println("You can't load the game yet!");
         }
     }
-
     private volatile File snakeStream;
     private synchronized void XML_Load() {
         // file je na razini klase
@@ -761,7 +761,7 @@ public class GameViewController implements Initializable {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document xmlDocument = db.parse(snakeStream);
-            xmlDocument.getDocumentElement().normalize();
+            xmlDocument.getDocumentElement().normalize(); // osiguravamo konzistentno formatiranje i micanje nepotrebnih nodeova.
             System.out.println("Root element: " + xmlDocument.getDocumentElement().getNodeName());
             NodeList nodeList = xmlDocument.getElementsByTagName("Snake");
 

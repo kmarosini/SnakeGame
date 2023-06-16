@@ -1,11 +1,8 @@
 package com.example.snake.utils;
 
-import com.example.snake.models.JNDIfields;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;

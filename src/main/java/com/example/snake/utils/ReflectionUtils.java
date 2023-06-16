@@ -61,7 +61,7 @@ public final class ReflectionUtils {
                         continue;
                     }
                 }
-
+                // skipping module-info
                 if ("module-info".equals(sb.toString())) {
                     continue;
                 }
@@ -69,6 +69,7 @@ public final class ReflectionUtils {
                 System.out.println("Fully qualified name: " + sb.toString());
 
                 try {
+                    // loadamo klasu dinamicki
                     Class<?> clazz = Class.forName(sb.toString());
 
                     writer.write("<h2>" + Modifier.toString(clazz.getModifiers()) + " " + clazz.getName() + "</h2>");

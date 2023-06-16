@@ -16,7 +16,6 @@ public class ChatThread implements Runnable{
     public void run() {
         while (true){
             try {
-            System.out.println("Chat thread wake up!");
                 Thread.sleep(1000);
                 chatHistory.clear();
                 StringBuilder chatHistoryBuilder = new StringBuilder();

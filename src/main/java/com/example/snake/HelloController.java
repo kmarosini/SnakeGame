@@ -1,8 +1,6 @@
 package com.example.snake;
 
-import com.example.snake.models.GameStateObject;
 import com.example.snake.models.PlayerDetails;
-import com.example.snake.models.SnakeMetaData;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -10,13 +8,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class HelloController {
 
